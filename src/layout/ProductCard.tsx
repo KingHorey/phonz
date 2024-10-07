@@ -24,7 +24,7 @@ const ProductCard = () => {
           <Link to="/s">
             <div className="w-full h-[160px]">
               <img
-                src="/src/assets/images/Iphone 14 pro 1.png"
+                src="/images/Iphone 14 pro 1.png"
                 alt=""
                 className="object-contain h-full w-full"
               >

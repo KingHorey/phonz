@@ -28,7 +28,7 @@ function Product() {
             <div className="flex xs:flex-col md:flex-row max-h-[540px] min-h-[536px] min-w-[530px] max-w-[532px] gap-12 justify-center items-center">
               <div className="h-full w-[75px]"></div>
               <div className="h-full w-full object-cover">
-                <img src="/src/assets/images/Image.png"></img>
+                <img src="/images/Image.png"></img>
               </div>
             </div>
             <div className="flex flex-col gap-8 md:max-h-[672px] md:min-h-[650px] lg:w-3/5 p-2">

@@ -2,12 +2,12 @@
 
 @font-face {
   font-family: "SF Pro Display Bold";
-  src: url("/src/assets/fonts/SFPRODISPLAYBOLD.OTF");
+  src: url("/fonts/SFPRODISPLAYBOLD.OTF");
 }
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url("/src/assets/fonts/SFPRODISPLAYREGULAR.OTF");
+  src: url("/fonts/SFPRODISPLAYREGULAR.OTF");
 }
 
 @tailwind utilities;

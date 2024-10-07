@@ -20,7 +20,7 @@ function GridSections() {
             </div>
             <div className="h-full">
               <img
-                src="/src/assets/images/galaxy-s24-ultra-highlights-color-titanium-gray-back-mo-removebg-preview.png"
+                src="/images/galaxy-s24-ultra-highlights-color-titanium-gray-back-mo-removebg-preview.png"
                 className="h-full object-cover"
               />
             </div>
@@ -31,7 +31,7 @@ function GridSections() {
             <div className="flex items-center w-full gap-x-3">
               <div className="w-3/5">
                 <img
-                  src="/src/assets/images/hero__gnfk5g59t0qe_xlarge_2x 1.png"
+                  src="/images/hero__gnfk5g59t0qe_xlarge_2x 1.png"
                   className="h-full object-cover w-full"
                 />
               </div>
@@ -48,7 +48,7 @@ function GridSections() {
               <div className="flex items-center w-full gap-x-3">
                 <div className="w-3/5">
                   <img
-                    src="/src/assets/images/1-removebg-preview.png"
+                    src="/images/1-removebg-preview.png"
                     className="h-full object-cover w-full"
                   />
                 </div>
@@ -91,7 +91,7 @@ function GridSections() {
                 iPhone 16
               </h2>
               <img
-                src="/src/assets/images/iphone-16-design-removebg-preview.png"
+                src="/images/iphone-16-design-removebg-preview.png"
                 className="h-full object-cover mx-auto my-auto grayscale"
               />
             </div>

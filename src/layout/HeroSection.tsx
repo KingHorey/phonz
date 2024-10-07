@@ -37,7 +37,7 @@ function HeroSection() {
         {/* Image Section */}
         <div className="xs:mx-auto ">
           <img
-            src="/src/assets/images/Iphone Image.png"
+            src="/images/Iphone Image.png"
             className="xs:w-[289px] md:w-[406px] xs:h-full"
             alt="IPhone 15 Pro"
           />
