@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 
 /* import components for layout */
 import ProductCard from "./ProductCard";
@@ -70,11 +70,11 @@ function ProductsGrid() {
         </ul>
       </div>
       <GridContainer>
-        {/* {productData.map((product) => ( */}
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
-        {/* ))} */}
+        {!productData
+          ? ""
+          : Array.from({ length: 9 }).map((_, index) => (
+              <ProductCard key={index} />
+            ))}
       </GridContainer>
     </section>
   );

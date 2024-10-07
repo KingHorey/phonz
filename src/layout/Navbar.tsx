@@ -4,7 +4,7 @@ import {
   HeartIcon,
   SmartphoneIcon,
   SearchIcon,
-  Menu,
+  // Menu,
 } from "lucide-react";
 
 /* import shadcn components */

@@ -5,7 +5,7 @@ function Breadcrumbs() {
   const splitNames = pathname.split("/").filter((name) => name !== "");
 
   return (
-    <div className="flex gap-3 text-base poppins-regular text-black/70 hover:text-black duration-200 transition-all">
+    <nav className="flex gap-3 text-base p" aria-label="breadcrumb">
       <Link to="/" className="">
         Home
       </Link>
@@ -14,14 +14,18 @@ function Breadcrumbs() {
         const url = `/${splitNames.slice(0, index + 1).join("/")}`;
         return (
           <>
-            <Link key={name} to={url} className="">
-              {name}
+            <Link
+              key={name}
+              to={url}
+              className="text-base poppins-regular text-black/70 hover:text-black duration-200 transition-all"
+            >
+              {name.charAt(0).toUpperCase() + name.slice(1)}
             </Link>
             {index !== splitNames.length - 1 && <span>&gt;</span>}
           </>
         );
       })}
-    </div>
+    </nav>
   );
 }
 

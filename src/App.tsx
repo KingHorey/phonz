@@ -3,10 +3,15 @@ import "./App.css";
 /* import routers */
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+//  import react-query
+import { QueryClient, QueryClientProvider } from "react-query";
+
 //  import pages
 import Homepage from "./pages/Homepage";
 import ProductsPage from "./pages/ProductsPage";
 import Product from "./pages/Product";
+
+const client = new QueryClient();
 
 const routes = createBrowserRouter([
   {
@@ -29,7 +34,11 @@ const routes = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={routes}></RouterProvider>;
+  return (
+    <QueryClientProvider client={client}>
+      <RouterProvider router={routes}></RouterProvider>
+    </QueryClientProvider>
+  );
 }
 
 export default App;
