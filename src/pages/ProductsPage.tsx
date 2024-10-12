@@ -5,6 +5,7 @@ import PageContainer from "@/layout/PageContainer";
 // import { Form } from "@/components/ui/form";
 import Footer from "@/layout/Footer";
 
+//  import svg icons and styling
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -12,12 +13,34 @@ import {
   DropdownMenuContent,
 } from "@radix-ui/react-dropdown-menu";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+// import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+
 import { ChevronDown } from "lucide-react";
 
+//  import react-query hooks
+import { useGetProducts } from "@/lib/products/requests";
+
 //  react imports
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Breadcrumbs from "@/layout/Breadcrumbs";
+
+// import
+import { filteringSchema } from "@/utils/types.d";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+//  import number formatter
 
 const sortOrdering = [
   { name: "Rating" },
@@ -27,14 +50,133 @@ const sortOrdering = [
   { name: "Price Low to High" },
 ];
 
+const brands = [
+  { name: "Apple" },
+  { name: "Samsung" },
+  { name: "OnePlus" },
+  { name: "Xiaomi" },
+  { name: "Google" },
+  { name: "Realme" },
+  { name: "Oppo" },
+  { name: "Vivo" },
+];
+
+const capacity = [
+  { name: 64 },
+  { name: 128 },
+  { name: 256 },
+  { name: 512 },
+  { name: 1 },
+];
+
 function ProductsPage() {
   const [sortOrder, setSortOrder] = useState<string>("Newest First");
   const [_, setRevealSideBar] = useState<boolean>(false);
+  const [filterString, setFilterString] = useState<string>("");
+
+  const {
+    data: products,
+    isLoading,
+    isError,
+    isSuccess,
+    refetch,
+  } = useGetProducts(filterString);
+
+  const form = useForm<z.infer<typeof filteringSchema>>({
+    resolver: zodResolver(filteringSchema),
+    defaultValues: {
+      capacity: undefined,
+      ram: [],
+      color: "",
+      price: { min: 0, max: 0 },
+      brand: [],
+    },
+  });
+
+  useEffect(() => {
+    if (filterString) {
+      console.log("url: ", filterString);
+      refetch();
+    }
+  }, [filterString, refetch]);
+
+  form.watch("brand");
+  form.watch("capacity");
+
+  function handleBrandFiltering(status: boolean, brand: { name: string }) {
+    let result = form.getValues("brand") || [];
+    if (!Array.isArray(result)) {
+      result = [];
+    }
+    if (status) {
+      result.push(brand.name);
+    } else {
+      result = result.filter((item) => item !== brand.name);
+    }
+    form.setValue("brand", result);
+    const brands = form.getValues("brand");
+    const url = new URLSearchParams();
+    brands?.forEach((brand) => {
+      url.append("brand", brand);
+    });
+    setFilterString(`?q&${url.toString()}`);
+    // Update the query parameters and refetch the products
+  }
+
+  function handleStorageFiltering(status: boolean, capacity: { name: number }) {
+    let result = form.getValues("capacity") || [];
+    if (!Array.isArray(result)) {
+      result = [];
+    }
+    if (status) {
+      result.push(capacity.name);
+    } else {
+      result = result.filter((item) => item !== capacity.name);
+      console.log("updated: ", result);
+    }
+    console.log(filterString);
+
+    //  check if result has data
+    // if (result.length === 0) {
+    //   console.log("empty");
+    //   result = [];
+    //   setFilterString("");
+    //   return;
+    // }
+    form.setValue("capacity", result);
+    const storageCapacity = form.getValues("capacity");
+    console.log("==> ", storageCapacity);
+    const url = new URLSearchParams();
+    storageCapacity?.forEach((item) => {
+      url.append("capacity", item.toString());
+      console.log("new url => ", url);
+    });
+    if (filterString.length === 0) {
+      setFilterString(`?q&${url.toString()}`);
+    } else if (filterString.length > 0 && !filterString.includes("capacity")) {
+      // If there's an existing filterString but no 'capacity', append the new capacity filter
+      setFilterString(`${filterString}&${url.toString()}`);
+    } else if (filterString.includes("capacity") && filterString.length > 0) {
+      // If 'capacity' is already in filterString, replace it with the new capacity filter
+      setFilterString(
+        filterString.replace(/(&capacity=[^&]*)/g, `&${url.toString()}`)
+      );
+    } else {
+      // If there's no filterString yet, initialize it with the new capacity filter
+      setFilterString(`?q&${url.toString()}`);
+    }
+
+    if (result.length === 0) {
+      result = [];
+      setFilterString("");
+      return;
+    }
+    console.log(filterString);
+  }
 
   return (
     <>
       <Navbar />
-
       <main>
         <PageContainer>
           <section className="py-10 flex flex-col gap-y-5">
@@ -47,93 +189,91 @@ function ProductsPage() {
                 >
                   Filter
                 </h2>
-                <div className="xs:hidden xs:absolute md:relative xs:left-0 md:inline-block w-full">
+                <div className="xs:hidden xs:absolute md:relative xs:left-0 md:inline-block w-full flex flex-col gap-y-5">
                   <div className="flex flex-col gap-y-3">
-                    <h3 className="font-bold text-base poppins-regular">
-                      Brand
-                    </h3>
-                    <form className="flex flex-col gap-x-3 gap-y-2 min-h-[145px] max-h-[150px] overflow-y-scroll">
-                      <div>
-                        <input
-                          type="checkbox"
+                    <h3 className="font-bold text-sm poppins-regular">Brand</h3>
+                    <Form {...form}>
+                      <form
+                        className="flex flex-col gap-x-3 gap-y-5 min-h-[145px] max-h-[150px] overflow-y-scroll p-2"
+                        // onSubmit={form.handleSubmit((data) =>
+                        //   handleFiltering(data)
+                        // )}
+                      >
+                        <FormField
                           name="brand"
-                          value="Apple"
-                          id="Apple"
-                          className="accent-black"
+                          control={form.control}
+                          render={({ field }) => {
+                            return (
+                              <FormItem>
+                                {brands.map((brand) => (
+                                  <FormControl key={brand.name}>
+                                    <div className="flex gap-x-3 item-center mb-2">
+                                      <Checkbox
+                                        {...field}
+                                        id={brand.name}
+                                        value={brand.name}
+                                        {...form.register("brand")}
+                                        onCheckedChange={(isChecked: boolean) =>
+                                          handleBrandFiltering(isChecked, brand)
+                                        }
+                                      />
+                                      <FormLabel htmlFor={brand.name}>
+                                        {brand.name}
+                                      </FormLabel>
+                                    </div>
+                                  </FormControl>
+                                ))}
+                              </FormItem>
+                            );
+                          }}
                         />
-                        <label htmlFor="Apple" className="ml-2">
-                          Apple
-                        </label>
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          name="brand"
-                          value="Samsung"
-                          id="Samsung"
-                          className="accent-black"
-                        />
-                        <label htmlFor="Samsung" className="ml-2">
-                          Samsung
-                        </label>
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          name="brand"
-                          value="OnePlus"
-                          id="OnePlus"
-                          className="accent-black"
-                        />
-                        <label htmlFor="OnePlus" className="ml-2">
-                          OnePlus
-                        </label>
-                      </div>
-                    </form>
+                      </form>
+                    </Form>
                   </div>
-                  <div className="flex flex-col gap-x-3 gap-y-2 min-h-[145px] max-h-[150px] overflow-y-scroll">
-                    <h3 className="font-bold text-base poppins-regular">
-                      Category
+
+                  {/*  for storage */}
+                  <div className="flex flex-col gap-y-3 my-5">
+                    <h3 className="font-bold text-sm poppins-regular">
+                      Storage Capacity
                     </h3>
-                    <form className="flex flex-col gap-x-3 gap-y-2">
-                      <div>
-                        <input
-                          type="checkbox"
-                          name="category"
-                          value="Mobile"
-                          id="Mobile"
-                          className="accent-black"
+                    <Form {...form}>
+                      <form className="flex flex-col gap-x-3 gap-y-5 min-h-[145px] max-h-[150px] overflow-y-scroll p-2">
+                        <FormField
+                          name="capacity"
+                          control={form.control}
+                          render={({ field }) => {
+                            return (
+                              <FormItem>
+                                {capacity.map((storage) => (
+                                  <FormControl key={storage.name}>
+                                    <div className="flex gap-x-3 item-center mb-2">
+                                      <Checkbox
+                                        {...field}
+                                        id={storage.name.toString()}
+                                        value={`${storage.name}`}
+                                        {...form.register("capacity")}
+                                        onCheckedChange={(isChecked: boolean) =>
+                                          handleStorageFiltering(
+                                            isChecked,
+                                            storage
+                                          )
+                                        }
+                                      />
+                                      <FormLabel htmlFor={`${storage.name}`}>
+                                        {storage.name}GB
+                                      </FormLabel>
+                                    </div>
+                                  </FormControl>
+                                ))}
+                              </FormItem>
+                            );
+                          }}
                         />
-                        <label htmlFor="Mobile" className="ml-2">
-                          Mobile
-                        </label>
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          name="category"
-                          value="Laptop"
-                          id="Laptop"
-                          className="accent-black"
-                        />
-                        <label htmlFor="Laptop" className="ml-2">
-                          Laptop
-                        </label>
-                      </div>
-                      <div>
-                        <input
-                          type="checkbox"
-                          name="category"
-                          value="Tablet"
-                          id="Tablet"
-                          className="accent-black"
-                        />
-                        <label htmlFor="Tablet" className="ml-2">
-                          Tablet
-                        </label>
-                      </div>
-                    </form>
+                      </form>
+                    </Form>
                   </div>
+                  {/* end */}
+
                   <div className="flex flex-col gap-x-3 gap-y-2 min-h-[145px] max-h-[150px] overflow-y-scroll">
                     <h3 className="font-bold text-base poppins-regular">
                       Price
@@ -199,9 +339,15 @@ function ProductsPage() {
                   </div>
                 </div>
                 <GridContainer>
-                  <ProductCard />
-                  <ProductCard />
-                  <ProductCard />
+                  {isLoading
+                    ? Array.from({ length: 9 }).map((_) => (
+                        <Skeleton className="min-w-[160px] w-[268px] h-[380px] bg-[#F6F6F6] rounded-lg py-6 px-4" />
+                      ))
+                    : isSuccess
+                    ? products.data?.map((product) => (
+                        <ProductCard key={product.id} {...product} />
+                      ))
+                    : isError && <p>Error fetching data</p>}
                 </GridContainer>
               </div>
             </div>

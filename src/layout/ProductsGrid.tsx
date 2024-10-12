@@ -5,12 +5,15 @@ import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import GridContainer from "./GridContainer";
 
+//  import axios
+import { useGetProducts } from "@/lib/products/requests";
+
 /* import custom axios config */
-import myAxios from "../utils/axiosConfig";
 
 /* schema check and type */
-import { z } from "zod";
-import { productCardSchema } from "../utils/types.d";
+// import { z } from "zod";
+// import { productCardSchema } from "../utils/types.d";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const links = [
   {
@@ -24,44 +27,39 @@ const links = [
 ];
 
 function ProductsGrid() {
-  const [currentLink, setCurrentLink] = useState<string>("New Arrivals");
-  const [productData, setProductData] = useState<
-    z.infer<typeof productCardSchema>[]
-  >([]);
+  const [currentLink, setCurrentLink] = useState<string>("new-arrivals");
 
   const handleLinkClick = (path: string, link: string) => {
-    console.log(path, link);
+    console.log(path);
     setCurrentLink(link);
   };
 
+  const {
+    data: product,
+    isSuccess,
+    isLoading,
+    refetch,
+  } = useGetProducts(`?q=${currentLink}`);
+
   /* fetch data from the backend */
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const data = await myAxios.get(`/{currentLink}`);
-        if (data.status === 200) {
-          const verifyData = productCardSchema.array().parse(data.data);
-          setProductData(verifyData);
-        }
-      } catch (err: any) {
-        console.error(err.message);
-      }
-    };
-    getData();
-  }, [currentLink]);
+    refetch();
+  }, [currentLink, refetch]);
 
   return (
-    <section className="w-full pt-10">
-      <div className="lg:mx-[160px]">
-        <ul className="flex gap-5 ml-10">
+    <section className="w-5/6 mx-auto pt-10 my-10">
+      <div className=" mx-[50px]">
+        <ul className="flex gap-5 w-full">
           {links.map(({ path, link }) => {
             return (
               <li
                 key={path}
                 onClick={() => handleLinkClick(path, link)}
-                className={`text-gray-400 sf-pro-display-regular cursor-pointer ${
-                  currentLink === path ? "text-black" : ""
-                }`}
+                className={`${
+                  currentLink === link
+                    ? "text-black font-semibold"
+                    : "text-gray-400"
+                } cursor-pointer poppins-regular `}
               >
                 {path}
               </li>
@@ -70,10 +68,19 @@ function ProductsGrid() {
         </ul>
       </div>
       <GridContainer>
-        {!productData
-          ? ""
-          : Array.from({ length: 9 }).map((_, index) => (
-              <ProductCard key={index} />
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 w-full sm:w-[300px] md:w-[240px]"
+              >
+                <Skeleton />
+              </div>
+            ))
+          : isSuccess &&
+            product &&
+            product?.data?.map((item) => (
+              <ProductCard {...item} key={item.id} />
             ))}
       </GridContainer>
     </section>

@@ -12,13 +12,19 @@ import { Form, FormField, FormControl, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
 /* import react-router elements */
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 
 /* import type annoation and related imports for search functionality*/
 import { z } from "zod";
 import { searchParamsSchema } from "../utils/types.d";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import { useSelector } from "react-redux";
+import { RootState } from "@/pages/Cart/cartStore";
+
+//  import react-auth-kit hooks
+import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 
 const links = [
   {
@@ -40,12 +46,18 @@ const links = [
 ];
 
 function Navbar() {
+  const isAuthenticated = useIsAuthenticated();
+  const cartLength = useSelector((cart: RootState) => cart.cart.item);
+
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof searchParamsSchema>>({
     resolver: zodResolver(searchParamsSchema),
   });
 
-  function submitSearch(data: z.infer<typeof searchParamsSchema>) {
-    console.log(data);
+  function submitForm(data: z.infer<typeof searchParamsSchema>) {
+    console.log("navigating to search page");
+    navigate(`/shop/search?${new URLSearchParams(data).toString()}`);
   }
 
   return (
@@ -64,7 +76,7 @@ function Navbar() {
         <div className="w-2/5">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(submitSearch)}
+              onSubmit={form.handleSubmit((data) => submitForm(data))}
               className="p-3 relative"
             >
               <FormField
@@ -77,12 +89,13 @@ function Navbar() {
                         <Input
                           {...field}
                           placeholder="search for product"
-                          className="bg-slate-300/20 border border-slate-300/20 py-3 h-full focus-within:border-slate-300/40 focus:outline-none focus:ring-0 focus:ring-slate-300/40 focus:ring-offset-0 focus:ring-offset-slate-300/40 text-base"
+                          className="bg-transparent border border-slate-300/20 py-3 h-full focus-within:border-slate-300/40 focus:outline-none focus:ring-0 focus:ring-slate-300/40 focus:ring-offset-0 focus:ring-offset-slate-300/40 text-base"
                         />
                       </FormControl>
                       <SearchIcon
-                        className="absolute top-5 right-5"
+                        className="absolute top-5 right-5 cursor-pointer"
                         size={20}
+                        onClick={form.handleSubmit((data) => submitForm(data))}
                       />
                     </FormItem>
                   );
@@ -111,10 +124,15 @@ function Navbar() {
           <Link to="/favorites">
             <HeartIcon size="20" className="cursor-pointer" />
           </Link>
-          <Link to="/cart">
-            <ShoppingCartIcon size="20" className="cursor-pointer" />
+          <Link to="/cart" className="relative">
+            <ShoppingCartIcon size="20" className="cursor-pointer relative" />
+            {cartLength.length > 0 && (
+              <span className="text-xs text-red-500 font-semibold absolute bottom-5 -right-2 rounded-full w-fit h-fit">
+                {cartLength.length}
+              </span>
+            )}
           </Link>
-          <Link to="/profile">
+          <Link to={isAuthenticated ? "/account" : "/login"}>
             <UserIcon size="20" className="cursor-pointer" />
           </Link>
         </ul>
