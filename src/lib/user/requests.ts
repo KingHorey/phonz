@@ -2,10 +2,7 @@ import endpoint from "../endpoints";
 import { z } from "zod";
 import { useMutation } from "react-query";
 import useAuthAxios from "@/utils/axiosConfig";
-import { loginSchema } from "@/utils/types.d";
-
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { authUser as userAuthType } from "@/utils/types";
+import { loginSchema, userProfileUpdateSchema } from "@/utils/types.d";
 
 import { useQuery } from "react-query";
 
@@ -40,16 +37,17 @@ export const useRegister = () => {
   return mutation;
 };
 
-export const useGetUserInfo = () => {
+export const useGetUserInfo = (id: string) => {
   const query = useQuery;
-  const user = useAuthUser<z.infer<typeof userAuthType>>();
-  console.log(user);
-  const id = user ? user.id : null;
+  const url = `${endpoint.user.profile}${id}/`;
   const axios = useAuthAxios();
+  if (id.length === 0) {
+    return { data: null, isSuccess: false, isLoading: false, isError: false };
+  }
   const response = query({
     queryFn: async () => {
       try {
-        const { data } = await axios.get(`${endpoint.user.profile}${id}/`);
+        const { data } = await axios.get(url);
         return data;
       } catch (err) {
         if (err instanceof Error) {
@@ -57,7 +55,28 @@ export const useGetUserInfo = () => {
         }
       }
     },
-    queryKey: ["user-info"],
+    queryKey: ["user-info", id],
+    enabled: Boolean(id),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
   return response;
 };
+
+export function useUpdateUser() {
+  const axios = useAuthAxios();
+  const mutation = useMutation(
+    async (data: z.infer<typeof userProfileUpdateSchema>) => {
+      try {
+        const url = `${endpoint.user.profile}${data.id}/`;
+        const response = await axios.put(url, data);
+        return response;
+      } catch (err: any) {
+        if (err.response) {
+          const message = err.response.data;
+          throw message;
+        }
+      }
+    }
+  );
+  return mutation;
+}

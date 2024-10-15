@@ -36,12 +36,12 @@ const links = [
     name: "Shop",
   },
   {
-    path: "/about",
+    path: "/about-us",
     name: "About",
   },
   {
-    path: "/contact-us",
-    name: "Contact Us",
+    path: "/faq",
+    name: "FAQs",
   },
 ];
 

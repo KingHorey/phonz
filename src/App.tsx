@@ -29,6 +29,8 @@ import { Toaster } from "@/components/ui/sonner";
 import Register from "./pages/Authentication/Register";
 import SearchPage from "./pages/SearchPage";
 import AccountManagement from "./pages/Account/Profile";
+import AboutUs from "./pages/Aboutus";
+import FAQ from "./pages/FAQq";
 
 const client = new QueryClient();
 
@@ -94,6 +96,14 @@ const routes = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/about-us",
+    element: <AboutUs />,
+  },
+  {
+    path: "/faq",
+    element: <FAQ />,
+  },
 ]);
 
 function App() {
@@ -104,7 +114,7 @@ function App() {
     cookieDomain: window.location.hostname,
     cookieSecure: false,
     refresh: createRefresh({
-      interval: 45 * 1000,
+      interval: 60 * 8, // set 2 minute to call for new token
       refreshApiCallback: async (param) => {
         try {
           const response = await axios.post(
@@ -116,10 +126,11 @@ function App() {
               },
             }
           );
+          console.log("new token", response.data);
           return {
             isSuccess: true,
             newAuthToken: response.data.access,
-            newAuthTokenExpiresIn: 60,
+            newAuthTokenExpiresIn: 60 * 9,
             newRefreshTokenExpiresIn: 24 * 60 * 60,
           };
         } catch {

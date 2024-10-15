@@ -52,6 +52,7 @@ function Register() {
             });
           });
         }
+        console.log(form.formState.errors);
       },
     });
   }

@@ -116,3 +116,37 @@ export const authUser = z.object({
   first_name: z.string(),
   last_name: z.string(),
 });
+
+export const userProfileUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  first_name: z
+    .string()
+    .min(3, {
+      message:
+        "Please ensure that your first name is at least 3 characters long",
+    })
+    .max(15, {
+      message:
+        "Please ensure that your first name is at most 5 characters long",
+    }),
+  last_name: z
+    .string()
+    .min(3, {
+      message:
+        "Please ensure that your last name is at least 3 characters long",
+    })
+    .max(15, {
+      message: "Please ensure that your last name is at most 5 characters long",
+    }),
+  email: z.string().email(),
+  phone_number: z
+    .string()
+    .nullable()
+    .optional()
+    .refine((value) => value.startsWith("+"), {
+      message: "Phone numbers must start with + ",
+    }),
+  address: z.string().nullable(),
+  new_password: z.string().optional().nullable(),
+  confirm_password: z.string().optional(),
+});
